@@ -1,26 +1,20 @@
 {
   "name": "SomeConfig Issue Repro",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "app",
-  "workspaceFolder": "/var/www/html",
-  "shutdownAction": "stopCompose",
-
-  "forwardPorts": [8888],
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {}
+  },
+  "forwardPorts": [80],
   "portsAttributes": {
-    "8888": {
+    "80": {
       "label": "Silverstripe CMS",
       "onAutoForward": "notify"
     }
   },
-
-  "containerEnv": {
-    "CODESPACE_NAME": "${localEnv:CODESPACE_NAME}",
-    "GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN": "${localEnv:GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
-  },
-
-  "postCreateCommand": "composer install && php vendor/bin/sake db:build --flush",
-  "postStartCommand": "if [ -n \"$CODESPACE_NAME\" ]; then grep -q '^SS_BASE_URL=' .env 2>/dev/null && sed -i \"s|^SS_BASE_URL=.*|SS_BASE_URL=\\\"https://${CODESPACE_NAME}-8888.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}\\\"|\" .env || echo \"SS_BASE_URL=\\\"https://${CODESPACE_NAME}-8888.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}\\\"\" >> .env; fi && sudo apache2ctl start 2>/dev/null || true",
-
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "postStartCommand": "sudo service mariadb start && sudo apache2ctl start 2>/dev/null || true",
   "customizations": {
     "vscode": {
       "extensions": [
